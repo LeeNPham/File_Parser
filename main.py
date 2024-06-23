@@ -4,6 +4,16 @@ import os
 
 
 def rotate_image(image, angle):
+    """
+    Rotate the given image by the specified angle.
+
+    Args:
+        image (numpy.ndarray): The input image.
+        angle (float): The angle by which to rotate the image.
+
+    Returns:
+        numpy.ndarray: The rotated image.
+    """
     (h, w) = image.shape[:2]
     center = (w // 2, h // 2)
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
@@ -12,6 +22,16 @@ def rotate_image(image, angle):
 
 
 def four_point_transform(image, pts):
+    """
+    Perform a perspective transform to obtain a top-down view of the image.
+
+    Args:
+        image (numpy.ndarray): The input image.
+        pts (numpy.ndarray): Array of four points specifying the region to transform.
+
+    Returns:
+        numpy.ndarray: The transformed image.
+    """
     rect = np.zeros((4, 2), dtype="float32")
     s = pts.sum(axis=1)
     rect[0] = pts[np.argmin(s)]
@@ -36,6 +56,15 @@ def four_point_transform(image, pts):
 
 
 def crop_white_margins(image):
+    """
+    Crop white margins from the image.
+
+    Args:
+        image (numpy.ndarray): The input image.
+
+    Returns:
+        numpy.ndarray: The cropped image.
+    """
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
     binary = cv2.bitwise_not(binary)
@@ -46,6 +75,16 @@ def crop_white_margins(image):
 
 
 def add_padding(image, padding_size=100):
+    """
+    Add white padding around the image.
+
+    Args:
+        image (numpy.ndarray): The input image.
+        padding_size (int): The size of the padding to add.
+
+    Returns:
+        numpy.ndarray: The padded image.
+    """
     padded_image = cv2.copyMakeBorder(
         image,
         padding_size,
@@ -59,10 +98,28 @@ def add_padding(image, padding_size=100):
 
 
 def crop_edges(image, crop_size=5):
+    """
+    Crop a specified number of pixels from the edges of the image.
+
+    Args:
+        image (numpy.ndarray): The input image.
+        crop_size (int): The number of pixels to crop from each edge.
+
+    Returns:
+        numpy.ndarray: The cropped image.
+    """
     return image[crop_size:-crop_size, crop_size:-crop_size]
 
 
 def extract_photos(image_path, output_folder, debug_folder):
+    """
+    Extract photos from a scanned image file.
+
+    Args:
+        image_path (str): Path to the input image file.
+        output_folder (str): Folder where the extracted photos will be saved.
+        debug_folder (str): Folder where debug images will be saved.
+    """
     # Load the image
     image = cv2.imread(image_path)
     if image is None:
@@ -126,7 +183,7 @@ def extract_photos(image_path, output_folder, debug_folder):
                 photo = crop_white_margins(photo)
 
                 # Crop edges by 5 pixels
-                photo = crop_edges(photo, 1)
+                photo = crop_edges(photo, 5)
 
                 # Save the photo
                 output_path = os.path.join(output_folder, f"photo_{photo_count}.png")
@@ -152,7 +209,7 @@ def extract_photos(image_path, output_folder, debug_folder):
                 photo = crop_white_margins(photo)
 
                 # Crop edges by 5 pixels
-                photo = crop_edges(photo, 2)
+                photo = crop_edges(photo, 5)
 
                 # Save the photo
                 output_path = os.path.join(output_folder, f"photo_{photo_count}.png")
@@ -163,6 +220,14 @@ def extract_photos(image_path, output_folder, debug_folder):
 
 
 def process_folder(input_folder, output_folder, debug_folder):
+    """
+    Process all image files in the input folder.
+
+    Args:
+        input_folder (str): Path to the folder containing input images.
+        output_folder (str): Folder where the extracted photos will be saved.
+        debug_folder (str): Folder where debug images will be saved.
+    """
     # Iterate over all files in the input folder
     for filename in os.listdir(input_folder):
         file_path = os.path.join(input_folder, filename)
