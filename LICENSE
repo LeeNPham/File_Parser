@@ -1,4 +1,4 @@
-                    GNU AFFERO GENERAL PUBLIC LICENSE
+GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
@@ -659,3 +659,22 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.
+
+
+18. Profit Sharing Clause.
+
+  In addition to the terms and conditions laid out in this license, any individual or organization that uses this program, or any derivative work, for commercial purposes must share a portion of the profits generated with the original author(s). 
+
+  The specific terms of profit sharing are as follows:
+
+  a) An annual report of profits derived from the use of this program must be provided to the original author(s).
+  
+  b) A minimum of 10% of the net profits generated from the use of this program must be paid to the original author(s).
+
+  c) Payments should be made annually, within 60 days of the end of the fiscal year.
+
+  d) Failure to comply with this profit-sharing clause will result in the termination of the license granted under this agreement.
+
+  e) For clarity, "commercial purposes" is defined as any usage that generates revenue, including but not limited to, selling, licensing, or otherwise monetizing the program.
+
+  The original author(s) can be contacted at the email address or physical mailing address provided in the program documentation for profit-sharing arrangements.
