@@ -4,16 +4,6 @@ import os
 
 
 def rotate_image(image, angle):
-    """
-    Rotate the image by a specified angle.
-
-    Parameters:
-        image (numpy.ndarray): The input image.
-        angle (float): The angle by which to rotate the image.
-
-    Returns:
-        numpy.ndarray: The rotated image.
-    """
     (h, w) = image.shape[:2]
     center = (w // 2, h // 2)
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
@@ -22,16 +12,6 @@ def rotate_image(image, angle):
 
 
 def four_point_transform(image, pts):
-    """
-    Perform a perspective transform to obtain a top-down view of the image.
-
-    Parameters:
-        image (numpy.ndarray): The input image.
-        pts (numpy.ndarray): The four points specifying the region to transform.
-
-    Returns:
-        numpy.ndarray: The transformed image.
-    """
     rect = np.zeros((4, 2), dtype="float32")
     s = pts.sum(axis=1)
     rect[0] = pts[np.argmin(s)]
@@ -56,15 +36,6 @@ def four_point_transform(image, pts):
 
 
 def crop_white_margins(image):
-    """
-    Crop white margins from the image.
-
-    Parameters:
-        image (numpy.ndarray): The input image.
-
-    Returns:
-        numpy.ndarray: The cropped image without white margins.
-    """
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
     binary = cv2.bitwise_not(binary)
@@ -75,16 +46,6 @@ def crop_white_margins(image):
 
 
 def add_padding(image, padding_size=100):
-    """
-    Add white padding around the image.
-
-    Parameters:
-        image (numpy.ndarray): The input image.
-        padding_size (int): The size of the padding to add.
-
-    Returns:
-        numpy.ndarray: The image with added padding.
-    """
     padded_image = cv2.copyMakeBorder(
         image,
         padding_size,
@@ -98,27 +59,10 @@ def add_padding(image, padding_size=100):
 
 
 def crop_edges(image, crop_size=5):
-    """
-    Crop a specified number of pixels from the edges of the image.
-
-    Parameters:
-        image (numpy.ndarray): The input image.
-        crop_size (int): The number of pixels to crop from each edge.
-
-    Returns:
-        numpy.ndarray: The cropped image.
-    """
     return image[crop_size:-crop_size, crop_size:-crop_size]
 
 
-def extract_photos(image_path, output_folder):
-    """
-    Extract photos from a scanned image file.
-
-    Parameters:
-        image_path (str): The path to the input image file.
-        output_folder (str): The folder where the extracted photos will be saved.
-    """
+def extract_photos(image_path, output_folder, debug_folder):
     # Load the image
     image = cv2.imread(image_path)
     if image is None:
@@ -152,7 +96,7 @@ def extract_photos(image_path, output_folder):
     # Debug: Draw all contours
     debug_image = padded_image.copy()
     cv2.drawContours(debug_image, contours, -1, (0, 255, 0), 2)
-    cv2.imwrite(os.path.join(output_folder, "debug_all_contours.png"), debug_image)
+    cv2.imwrite(os.path.join(debug_folder, "debug_all_contours.png"), debug_image)
 
     # Loop through contours and extract rectangular photos
     photo_count = 0
@@ -174,7 +118,7 @@ def extract_photos(image_path, output_folder):
 
                 # Debug: Save the transformed photo before cropping white margins
                 cv2.imwrite(
-                    os.path.join(output_folder, f"debug_transformed_{photo_count}.png"),
+                    os.path.join(debug_folder, f"debug_transformed_{photo_count}.png"),
                     photo,
                 )
 
@@ -182,7 +126,7 @@ def extract_photos(image_path, output_folder):
                 photo = crop_white_margins(photo)
 
                 # Crop edges by 5 pixels
-                photo = crop_edges(photo, 5)
+                photo = crop_edges(photo, 1)
 
                 # Save the photo
                 output_path = os.path.join(output_folder, f"photo_{photo_count}.png")
@@ -199,7 +143,7 @@ def extract_photos(image_path, output_folder):
                 # Debug: Save the transformed photo before cropping white margins
                 cv2.imwrite(
                     os.path.join(
-                        output_folder, f"debug_transformed_skew_{photo_count}.png"
+                        debug_folder, f"debug_transformed_skew_{photo_count}.png"
                     ),
                     photo,
                 )
@@ -208,22 +152,35 @@ def extract_photos(image_path, output_folder):
                 photo = crop_white_margins(photo)
 
                 # Crop edges by 5 pixels
-                photo = crop_edges(photo, 5)
+                photo = crop_edges(photo, 2)
 
                 # Save the photo
                 output_path = os.path.join(output_folder, f"photo_{photo_count}.png")
                 cv2.imwrite(output_path, photo)
                 photo_count += 1
 
-    print(f"Extracted {photo_count} photos.")
+    print(f"Extracted {photo_count} photos from {os.path.basename(image_path)}.")
+
+
+def process_folder(input_folder, output_folder, debug_folder):
+    # Iterate over all files in the input folder
+    for filename in os.listdir(input_folder):
+        file_path = os.path.join(input_folder, filename)
+        if os.path.isfile(file_path):
+            try:
+                extract_photos(file_path, output_folder, debug_folder)
+            except ValueError as e:
+                print(e)
 
 
 # Define paths
-image_path = "./mnt/data/test-1.jpg"
+input_folder = "./mnt/data/input_folder"
 output_folder = "./mnt/data/output_photos"
+debug_folder = "./mnt/data//output_photos/output_debug_photos"
 
-# Create output folder if it does not exist
+# Create output and debug folders if they do not exist
 os.makedirs(output_folder, exist_ok=True)
+os.makedirs(debug_folder, exist_ok=True)
 
-# Extract photos
-extract_photos(image_path, output_folder)
+# Process all images in the input folder
+process_folder(input_folder, output_folder, debug_folder)
