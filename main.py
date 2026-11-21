@@ -120,6 +120,8 @@ def extract_photos(image_path, output_folder, debug_folder):
         output_folder (str): Folder where the extracted photos will be saved.
         debug_folder (str): Folder where debug images will be saved.
     """
+    # Prefix outputs with the source file name so several scans in one folder don't overwrite each other
+    name = os.path.splitext(os.path.basename(image_path))[0]
     # Load the image
     image = cv2.imread(image_path)
     if image is None:
@@ -153,7 +155,7 @@ def extract_photos(image_path, output_folder, debug_folder):
     # Debug: Draw all contours
     debug_image = padded_image.copy()
     cv2.drawContours(debug_image, contours, -1, (0, 255, 0), 2)
-    cv2.imwrite(os.path.join(debug_folder, "debug_all_contours.png"), debug_image)
+    cv2.imwrite(os.path.join(debug_folder, f"debug_all_contours_{name}.png"), debug_image)
 
     # Loop through contours and extract rectangular photos
     photo_count = 0
@@ -175,7 +177,7 @@ def extract_photos(image_path, output_folder, debug_folder):
 
                 # Debug: Save the transformed photo before cropping white margins
                 cv2.imwrite(
-                    os.path.join(debug_folder, f"debug_transformed_{photo_count}.png"),
+                    os.path.join(debug_folder, f"debug_transformed_{name}_{photo_count}.png"),
                     photo,
                 )
 
@@ -186,7 +188,7 @@ def extract_photos(image_path, output_folder, debug_folder):
                 photo = crop_edges(photo, 5)
 
                 # Save the photo
-                output_path = os.path.join(output_folder, f"photo_{photo_count}.png")
+                output_path = os.path.join(output_folder, f"{name}_{photo_count}.png")
                 cv2.imwrite(output_path, photo)
                 photo_count += 1
         else:
@@ -200,7 +202,7 @@ def extract_photos(image_path, output_folder, debug_folder):
                 # Debug: Save the transformed photo before cropping white margins
                 cv2.imwrite(
                     os.path.join(
-                        debug_folder, f"debug_transformed_skew_{photo_count}.png"
+                        debug_folder, f"debug_transformed_skew_{name}_{photo_count}.png"
                     ),
                     photo,
                 )
@@ -212,7 +214,7 @@ def extract_photos(image_path, output_folder, debug_folder):
                 photo = crop_edges(photo, 5)
 
                 # Save the photo
-                output_path = os.path.join(output_folder, f"photo_{photo_count}.png")
+                output_path = os.path.join(output_folder, f"{name}_{photo_count}.png")
                 cv2.imwrite(output_path, photo)
                 photo_count += 1
 
